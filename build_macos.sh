@@ -10,6 +10,7 @@ python3 -m PyInstaller \
   --name "微信研究资料整理器" \
   --osx-bundle-identifier "org.local.wechat-research-collector" \
   --add-data "categories.json:." \
+  --collect-data certifi \
   --collect-all Vision \
   --collect-all Foundation \
   --collect-all Quartz \

@@ -1,3 +1,4 @@
 lxml>=5.0,<7
 openpyxl>=3.1,<4
 python-docx>=1.1,<2
+certifi>=2025.1.31

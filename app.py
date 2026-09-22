@@ -8,6 +8,7 @@ import html
 import io
 import json
 import re
+import ssl
 import sqlite3
 import subprocess
 import sys
@@ -19,6 +20,7 @@ from datetime import datetime, timezone
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 
+import certifi
 from docx import Document
 from lxml import html as lxml_html
 from openpyxl import Workbook
@@ -91,7 +93,8 @@ def fetch_article(url: str) -> tuple[str, str, str]:
         "User-Agent": "Mozilla/5.0 (research archiving; user-submitted URL)",
         "Accept-Language": "zh-CN,zh;q=0.9",
     })
-    with urllib.request.urlopen(req, timeout=20) as res:
+    ssl_context = ssl.create_default_context(cafile=certifi.where())
+    with urllib.request.urlopen(req, timeout=20, context=ssl_context) as res:
         if int(res.headers.get("Content-Length", "0") or 0) > 5 * 1024 * 1024:
             raise ValueError("页面过大")
         raw = res.read(5 * 1024 * 1024)
