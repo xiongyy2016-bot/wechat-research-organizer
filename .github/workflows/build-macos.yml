@@ -1,0 +1,49 @@
+name: Build macOS apps
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - "app.py"
+      - "categories.json"
+      - "requirements*.txt"
+      - "build_macos.sh"
+      - ".github/workflows/build-macos.yml"
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - runner: macos-15-intel
+            label: Intel
+          - runner: macos-15
+            label: AppleSilicon
+    runs-on: ${{ matrix.runner }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Build application
+        run: bash build_macos.sh
+
+      - name: Verify architecture and bundle
+        run: |
+          test -d "dist/微信研究资料整理器.app"
+          file "dist/微信研究资料整理器.app/Contents/MacOS/微信研究资料整理器"
+          codesign --verify --deep --strict "dist/微信研究资料整理器.app"
+
+      - name: Package application
+        run: ditto -c -k --sequesterRsrc --keepParent "dist/微信研究资料整理器.app" "微信研究资料整理器-macOS-${{ matrix.label }}.zip"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: 微信研究资料整理器-macOS-${{ matrix.label }}
+          path: 微信研究资料整理器-macOS-${{ matrix.label }}.zip
+          if-no-files-found: error
